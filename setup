@@ -7,7 +7,6 @@ MAIN_PACKAGES=(
   "@Fonts"
   "amd-gpu-firmware"
   "mt7xxx-firmware"
-  "cirrus-audio-firmware"
   "realtek-firmware"
   "dnfdragora"
   "bluedevil"
@@ -83,6 +82,17 @@ LAPTOP_PACKAGES=(
   "htop"
 )
 
+GRUB_CONF=(
+  "GRUB_TIMEOUT=1"
+  "GRUB_TIMEOUT_STYLE=hidden"
+  "GRUB_DISTRIBUTOR=\"\$(sed 's, release .*$,,g' /etc/system-release)\""
+  "GRUB_DEFAULT=saved"
+  "GRUB_DISABLE_SUBMENU=true"
+  "GRUB_CMDLINE_LINUX=\"rhgb quiet loglevel=3 mitigations=off nowatchdog processor.ignore_ppc=1 split_lock_detect=off amdgpu.ppfeaturemask=0xfffd7fff\""
+  "GRUB_DISABLE_RECOVERY=true"
+  "GRUB_ENABLE_BLSCFG=true"
+)
+
 ##### CHECK FOR SUDO or ROOT #####
 if ! [ $(id -u) = 0 ]; then
   echo "This script must be run as sudo or root, try again..."
@@ -136,16 +146,11 @@ echo "Configuring Boot parameters..."
 plymouth-set-default-theme bgrt -R
 setsebool -P domain_kernel_load_modules on
 
-cat << EOF > /etc/default/grub
-GRUB_TIMEOUT=1
-GRUB_TIMEOUT_STYLE=hidden
-GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
-GRUB_DEFAULT=saved
-GRUB_DISABLE_SUBMENU=true
-GRUB_CMDLINE_LINUX="rhgb quiet loglevel=3 mitigations=off nowatchdog processor.ignore_ppc=1 split_lock_detect=off amdgpu.ppfeaturemask=0xfffd7fff"
-GRUB_DISABLE_RECOVERY=true
-GRUB_ENABLE_BLSCFG=true
-EOF
+{
+  for config in "${GRUB_CONF[@]}"; do
+    echo "$config"
+  done
+} > /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 echo "Configuring Services..."
@@ -153,7 +158,7 @@ systemctl enable sddm
 systemctl enable uksmd.service
 systemctl set-default graphical.target
 systemctl disable NetworkManager-wait-online.service
-echo "The command (systemctl --user enable opentabletdriver.service) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
+echo "The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
 dracut --regenerate-all --force
 
 echo "Configuring Software..." ## curretly unused ##
