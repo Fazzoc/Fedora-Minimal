@@ -170,8 +170,8 @@ while true; do
             reboot
             exit 0 ;;
         [nN]) 
-            echo "Reboot cancelled. Please remember to reboot your system later."
             rm "setup" "OpenTabletDriver.rpm"
+            echo "Reboot cancelled. Please remember to reboot your system later."
             break ;;
         *) echo "Invalid input. Please try again." ;;
     esac
