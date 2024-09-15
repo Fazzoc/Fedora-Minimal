@@ -34,7 +34,6 @@ MAIN_PACKAGES=(
   "kscreen"
   "kscreenlocker"
   "ksshaskpass"
-  "kwebkitpart"
   "kwin"
   "kinfocenter"
   "krita"
@@ -62,8 +61,7 @@ MAIN_PACKAGES=(
   "sddm"
   "sddm-breeze"
   "sddm-kcm"
-  "ark"
-  "timeshift"
+  "ark"  
   "git"
   "fastfetch"
   "tar"
@@ -78,6 +76,7 @@ MAIN_PACKAGES=(
 
 DESKTOP_PACKAGES=(
   "plasma-systemmonitor"
+  "timeshift"
 )
 
 LAPTOP_PACKAGES=(
@@ -165,8 +164,15 @@ while true; do
     read -p "Would you like to reboot now? (Y|n):" choice
     choice=${choice:-y}
     case "${choice,,}" in
-        [yY]) echo "Rebooting now..."; reboot; exit 0 ;;
-        [nN]) echo "Reboot cancelled. Please remember to reboot your system later."; break ;;
+        [yY]) 
+            rm "setup" "OpenTabletDriver.rpm"
+            echo "Rebooting now..."
+            reboot
+            exit 0 ;;
+        [nN]) 
+            echo "Reboot cancelled. Please remember to reboot your system later."
+            rm "setup" "OpenTabletDriver.rpm"
+            break ;;
         *) echo "Invalid input. Please try again." ;;
     esac
 done
