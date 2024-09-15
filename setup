@@ -1,0 +1,172 @@
+#!/bin/env bash
+
+#### Package Lists ####
+MAIN_PACKAGES=(
+  "kernel-cachyos"
+  "uksmd"
+  "@Fonts"
+  "amd-gpu-firmware"
+  "mt7xxx-firmware"
+  "cirrus-audio-firmware"
+  "realtek-firmware"
+  "dnfdragora"
+  "bluedevil"
+  "breeze-icon-theme"
+  "colord-kde"
+  "cups-pk-helper"
+  "dolphin"
+  "glibc-all-langpacks"
+  "gnome-keyring-pam"
+  "kcm_systemd"
+  "kde-gtk-config"
+  "kde-print-manager"
+  "kde-settings-pulseaudio"
+  "kdegraphics-thumbnailers"
+  "kdeplasma-addons"
+  "kdialog"
+  "kdnssd"
+  "kf5-akonadi-server"
+  "kf5-akonadi-server-mysql"
+  "kf5-kipi-plugins"
+  "kf6-baloo-file"
+  "kmenuedit"
+  "kitty"
+  "kscreen"
+  "kscreenlocker"
+  "ksshaskpass"
+  "kwebkitpart"
+  "kwin"
+  "kinfocenter"
+  "krita"
+  "NetworkManager-config-connectivity-fedora"
+  "phonon-qt5-backend-gstreamer"
+  "pinentry-qt"
+  "plasma-breeze"
+  "plasma-desktop"
+  "plasma-discover"
+  "plasma-nm"
+  "plasma-nm-l2tp"
+  "plasma-nm-openconnect"
+  "plasma-nm-openswan"
+  "plasma-nm-openvpn"
+  "plasma-nm-pptp"
+  "plasma-nm-vpnc"
+  "plasma-pa"
+  "plasma-user-manager"
+  "plasma-workspace"
+  "plasma-workspace-geolocation"
+  "plymouth-theme-spinner"
+  "polkit-kde"
+  "qt5-qtbase-gui"
+  "qt5-qtdeclarative"
+  "sddm"
+  "sddm-breeze"
+  "sddm-kcm"
+  "ark"
+  "timeshift"
+  "git"
+  "fastfetch"
+  "tar"
+  "vlc"
+  "okular"
+  "bleachbit"
+  "gnome-disk-utility"
+  "util-linux-user"
+  "wget"
+  "./OpenTabletDriver.rpm"
+)
+
+DESKTOP_PACKAGES=(
+  "plasma-systemmonitor"
+)
+
+LAPTOP_PACKAGES=(
+  "htop"
+)
+
+##### CHECK FOR SUDO or ROOT #####
+if ! [ $(id -u) = 0 ]; then
+  echo "This script must be run as sudo or root, try again..."
+  exit 1
+fi
+
+echo "Stage 1 - package setup"
+echo "Installing packages.."
+sleep 1
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
+dnf copr enable bieszczaders/kernel-cachyos -y
+dnf copr enable bieszczaders/kernel-cachyos-addons -y
+
+dnf install "${MAIN_PACKAGES[@]}" -y
+flatpak install \
+  flathub io.gitlab.librewolf-community -y
+
+echo "Hey, There's some more packages to install!"
+while true; do
+      read -p "To continue further, type in which device you are using - (D)esktop|(L)aptop:" choice
+      choice=${choice:-d}
+      case "${choice,,}" in
+          [dD]) echo "Continuing install for Desktop..."; 
+          sleep 1
+            dnf install "${DESKTOP_PACKAGES[@]}" -y
+          break ;;
+          [lL]) echo "Continuing install for Laptop..."; 
+          sleep 1
+            dnf install "${LAPTOP_PACKAGES[@]}" -y
+          break ;;
+          *) echo "Invalid input. Please try again." ;;
+      esac
+done
+
+echo "Updating packages.."
+sleep 1
+dnf update -y
+
+echo "Removing unwanted packages.."
+sleep 1
+dnf erase \
+  plasma-welcome \
+  audiocd-kio -y
+
+rpm -e --nodeps \
+  maliit-keyboard
+
+echo "Stage 2 - Cofiguring system"
+echo "Configuring Boot parameters..."
+plymouth-set-default-theme bgrt -R
+setsebool -P domain_kernel_load_modules on
+
+cat << EOF > /etc/default/grub
+GRUB_TIMEOUT=1
+GRUB_TIMEOUT_STYLE=hidden
+GRUB_DISTRIBUTOR="$(sed 's, release .*$,,g' /etc/system-release)"
+GRUB_DEFAULT=saved
+GRUB_DISABLE_SUBMENU=true
+GRUB_CMDLINE_LINUX="rhgb quiet loglevel=3 mitigations=off nowatchdog processor.ignore_ppc=1 split_lock_detect=off amdgpu.ppfeaturemask=0xfffd7fff"
+GRUB_DISABLE_RECOVERY=true
+GRUB_ENABLE_BLSCFG=true
+EOF
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+echo "Configuring Services..."
+systemctl enable sddm
+systemctl enable uksmd.service
+systemctl set-default graphical.target
+systemctl disable NetworkManager-wait-online.service
+echo "The command (systemctl --user enable opentabletdriver.service) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
+dracut --regenerate-all --force
+
+echo "Configuring Software..." ## curretly unused ##
+
+echo "Setup Complete! Please reboot for all changes to take effect."
+
+while true; do
+    read -p "Would you like to reboot now? (Y|n):" choice
+    choice=${choice:-y}
+    case "${choice,,}" in
+        [yY]) echo "Rebooting now..."; reboot; exit 0 ;;
+        [nN]) echo "Reboot cancelled. Please remember to reboot your system later."; break ;;
+        *) echo "Invalid input. Please try again." ;;
+    esac
+done
