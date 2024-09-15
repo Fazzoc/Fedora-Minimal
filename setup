@@ -146,7 +146,7 @@ echo "Configuring Boot parameters..."
 plymouth-set-default-theme bgrt -R
 setsebool -P domain_kernel_load_modules on
 
-echo "${GRUB_CONF[*]}" > /etc/default/grub
+printf '%s\n' "${GRUB_CONF[@]}" > /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 echo "Configuring Services..."
