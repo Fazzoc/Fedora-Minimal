@@ -93,9 +93,9 @@ GRUB_CONF=(
   "GRUB_ENABLE_BLSCFG=true"
 )
 
-cleanup=(
+cleanup() {
   rm "setup" "OpenTabletDriver.rpm"
-)
+}
 
 ##### CHECK FOR SUDO or ROOT #####
 if ! [ $(id -u) = 0 ]; then
