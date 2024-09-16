@@ -72,15 +72,8 @@ MAIN_PACKAGES=(
 )
 
 declare -A DEVICE_PACKAGES
-DEVICE_PACKAGES[desktop]=(
-  "plasma-systemmonitor"
-  "timeshift"
-  "konsole-part"
-)
-
-DEVICE_PACKAGES[laptop]=(
-  "htop"
-)
+DEVICE_PACKAGES[desktop]="plasma-systemmonitor timeshift konsole-part"
+DEVICE_PACKAGES[laptop]="htop"
 
 GRUB_CONF=(
   "GRUB_TIMEOUT=1"
@@ -126,7 +119,7 @@ To continue further, type in which device you are using - (D)esktop|(l)aptop:" c
   
   echo "Continuing install for ${device_type^}..."
   sleep 1
-  dnf install "${DEVICE_PACKAGES[$device_type][@]}" -y
+  dnf install ${DEVICE_PACKAGES[$device_type]} -y
   break
 done
 
