@@ -71,12 +71,14 @@ MAIN_PACKAGES=(
   "./OpenTabletDriver.rpm"
 )
 
-DESKTOP_PACKAGES=(
+declare -A DEVICE_PACKAGES
+DEVICE_PACKAGES[desktop]=(
   "plasma-systemmonitor"
   "timeshift"
+  "konsole-part"
 )
 
-LAPTOP_PACKAGES=(
+DEVICE_PACKAGES[laptop]=(
   "htop"
 )
 
@@ -89,6 +91,11 @@ GRUB_CONF=(
   "GRUB_CMDLINE_LINUX=\"rhgb quiet loglevel=3 mitigations=off nowatchdog processor.ignore_ppc=1 split_lock_detect=off amdgpu.ppfeaturemask=0xfffd7fff\""
   "GRUB_DISABLE_RECOVERY=true"
   "GRUB_ENABLE_BLSCFG=true"
+)
+
+clean=(
+"setup"
+"OpenTabletDriver.rpm"
 )
 
 ##### CHECK FOR SUDO or ROOT #####
@@ -105,23 +112,22 @@ dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
 
 dnf install "${MAIN_PACKAGES[@]}" -y
-flatpak install io.gitlab.librewolf-community -y
+flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
 
 while true; do
 read -p "Hey, There's some more packages to install!
-To continue further, type in which device you are using - (D)esktop|(L)aptop:" choice
-    choice=${choice:-d}
-      case "${choice,,}" in
-          [dD]) echo "Continuing install for Desktop...";
-          sleep 1
-            dnf install "${DESKTOP_PACKAGES[@]}" -y
-          break ;;
-          [lL]) echo "Continuing install for Laptop..."; 
-          sleep 1
-            dnf install "${LAPTOP_PACKAGES[@]}" -q
-          break ;;
-          *) echo "Invalid input. Please try again." ;;
-      esac
+To continue further, type in which device you are using - (D)esktop|(l)aptop:" choice
+  choice=${choice:-d}
+  case "${choice,,}" in
+      d) device_type="desktop" ;;
+      l) device_type="laptop" ;;
+      *) echo "Invalid input. Please try again."; continue ;;
+  esac
+  
+  echo "Continuing install for ${device_type^}..."
+  sleep 1
+  dnf install "${DEVICE_PACKAGES[$device_type][@]}" -y
+  break
 done
 
 echo "Updating packages.."
@@ -158,16 +164,14 @@ while true; do
 read -p "Setup Complete! Please reboot for all changes to take effect.
 Would you like to reboot now? (Y|n):" choice
   choice=${choice:-y}
-    case "${choice,,}" in
-        [yY]) 
-            rm "setup" "OpenTabletDriver.rpm"
-            echo "Rebooting now..."
-            reboot
-            exit 0 ;;
-        [nN]) 
-            rm "setup" "OpenTabletDriver.rpm"
-            echo "Reboot cancelled. Please remember to reboot your system later."
-            break ;;
-        *) echo "Invalid input. Please try again." ;;
+  case "${choice,,}" in
+      y) echo "Rebooting now..."
+         rm "${clean[@]}"
+         reboot
+         exit 0 ;;
+      n) rm "${clean[@]}"
+         echo "Reboot cancelled. Please remember to reboot your system later."
+         break ;;
+      *) echo "Invalid input. Please try again." ;;
     esac
 done
