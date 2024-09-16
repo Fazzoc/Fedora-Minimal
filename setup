@@ -105,7 +105,7 @@ dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
 
 dnf install "${MAIN_PACKAGES[@]}" -y
-flatpak install flathub io.gitlab.librewolf-community -y
+flatpak install io.gitlab.librewolf-community -y
 
 while true; do
 read -p "Hey, There's some more packages to install!
