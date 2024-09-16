@@ -24,8 +24,6 @@ MAIN_PACKAGES=(
   "kdeplasma-addons"
   "kdialog"
   "kdnssd"
-  "kf5-akonadi-server"
-  "kf5-akonadi-server-mysql"
   "kf5-kipi-plugins"
   "kf6-baloo-file"
   "kmenuedit"
@@ -120,7 +118,7 @@ To continue further, type in which device you are using - (D)esktop|(L)aptop:" c
           break ;;
           [lL]) echo "Continuing install for Laptop..."; 
           sleep 1
-            dnf install "${LAPTOP_PACKAGES[@]}" -y
+            dnf install "${LAPTOP_PACKAGES[@]}" -q
           break ;;
           *) echo "Invalid input. Please try again." ;;
       esac
