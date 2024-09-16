@@ -72,15 +72,8 @@ main_packages=(
 )
 
 declare -A device_packages
-device_packages[desktop]=(
-  "plasma-systemmonitor"
-  "timeshift"
-  "konsole-part"
-)
-
-device_packages[laptop]=(
-  "htop"
-)
+device_packages[desktop]="plasma-systemmonitor timeshift konsole-part"
+device_packages[laptop]="htop"
 
 grub_conf=(
   "GRUB_TIMEOUT=1"
