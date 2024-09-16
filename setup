@@ -99,8 +99,7 @@ if ! [ $(id -u) = 0 ]; then
   exit 1
 fi
 
-echo "Stage 1 - package setup"
-echo "Installing packages.."
+printf "Stage 1 - package setup\nInstalling packages.."
 sleep 1
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
@@ -110,12 +109,12 @@ dnf copr enable bieszczaders/kernel-cachyos-addons -y
 dnf install "${MAIN_PACKAGES[@]}" -y
 flatpak install flathub io.gitlab.librewolf-community -y
 
-echo "Hey, There's some more packages to install!"
 while true; do
-      read -p "To continue further, type in which device you are using - (D)esktop|(L)aptop:" choice
-      choice=${choice:-d}
+read -p "Hey, There's some more packages to install!
+To continue further, type in which device you are using - (D)esktop|(L)aptop:" choice
+    choice=${choice:-d}
       case "${choice,,}" in
-          [dD]) echo "Continuing install for Desktop..."; 
+          [dD]) echo "Continuing install for Desktop...";
           sleep 1
             dnf install "${DESKTOP_PACKAGES[@]}" -y
           break ;;
@@ -140,8 +139,7 @@ dnf erase \
 rpm -e --nodeps \
   maliit-keyboard
 
-echo "Stage 2 - Cofiguring system"
-echo "Configuring Boot parameters..."
+printf "Stage 2 - Cofiguring system\nConfiguring Boot parameters...\n"
 plymouth-set-default-theme bgrt -R
 setsebool -P domain_kernel_load_modules on
 
@@ -158,11 +156,10 @@ dracut --regenerate-all --force
 
 echo "Configuring Software..." ## curretly unused ##
 
-echo "Setup Complete! Please reboot for all changes to take effect."
-
 while true; do
-    read -p "Would you like to reboot now? (Y|n):" choice
-    choice=${choice:-y}
+read -p "Setup Complete! Please reboot for all changes to take effect.
+Would you like to reboot now? (Y|n):" choice
+  choice=${choice:-y}
     case "${choice,,}" in
         [yY]) 
             rm "setup" "OpenTabletDriver.rpm"
