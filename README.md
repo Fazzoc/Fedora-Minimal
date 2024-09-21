@@ -1,4 +1,4 @@
 ## Run install script
 ```Bash
-curl -sO https://sor.bz/fedora-setup && sudo sh setup
+curl -O https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup && sudo sh setup
 ```
