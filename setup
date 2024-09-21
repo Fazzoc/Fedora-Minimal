@@ -117,7 +117,7 @@ To continue further, type in which device you are using - (D)esktop|(l)aptop:" c
       *) echo "Invalid input. Please try again."; continue ;;
   esac
   
-  echo "Continuing install for ${device_type^}..."
+  printf "Continuing install for ${device_type^}...\nThe rest of the setup will remember the device!"
   sleep 1
   dnf install ${device_packages[$device_type]} -y
   break
@@ -151,7 +151,10 @@ systemctl disable NetworkManager-wait-online.service
 echo "The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
 dracut --regenerate-all --force
 
-echo "Configuring Software..." ## curretly unused ##
+echo "Configuring Software..."
+
+cp -r Configs/Main/* $HOME/
+cp -r Configs/$device_type/* $HOME/
 
 while true; do
 read -p "Setup Complete! Please reboot for all changes to take effect.
