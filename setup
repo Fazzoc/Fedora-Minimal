@@ -157,10 +157,10 @@ Would you like to reboot now? (Y|n):" choice
   choice=${choice:-y}
   case "${choice,,}" in
       y) echo "Rebooting now..."
-         rm "${clean}"
+         rm "${clean[@]}"
          reboot
          exit 0 ;;
-      n) rm "${clean}"
+      n) rm "${clean[@]}"
          echo "Reboot cancelled. Please remember to reboot your system later."
          break ;;
       *) echo "Invalid input. Please try again." ;;
