@@ -93,12 +93,12 @@ fi
 
 printf "Stage 1 - package setup\nInstalling packages.."
 sleep 1
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
 dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
-
 dnf install "${main_packages[@]}" -y
+
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
 
 while true; do
@@ -157,10 +157,10 @@ Would you like to reboot now? (Y|n):" choice
   choice=${choice:-y}
   case "${choice,,}" in
       y) echo "Rebooting now..."
-         rm "${clean[@]}"
+         rm "${clean}"
          reboot
          exit 0 ;;
-      n) rm "${clean[@]}"
+      n) rm "${clean}"
          echo "Reboot cancelled. Please remember to reboot your system later."
          break ;;
       *) echo "Invalid input. Please try again." ;;
