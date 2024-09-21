@@ -14,11 +14,11 @@ main_packages=(
   "colord-kde"
   "cups-pk-helper"
   "dolphin"
+  "subversion"
   "glibc-all-langpacks"
   "gnome-keyring-pam"
   "kcm_systemd"
   "kde-gtk-config"
-  "kde-print-manager"
   "kde-settings-pulseaudio"
   "kdegraphics-thumbnailers"
   "kdeplasma-addons"
@@ -41,12 +41,6 @@ main_packages=(
   "plasma-desktop"
   "plasma-discover"
   "plasma-nm"
-  "plasma-nm-l2tp"
-  "plasma-nm-openconnect"
-  "plasma-nm-openswan"
-  "plasma-nm-openvpn"
-  "plasma-nm-pptp"
-  "plasma-nm-vpnc"
   "plasma-pa"
   "plasma-user-manager"
   "plasma-workspace"
@@ -71,10 +65,8 @@ main_packages=(
   "./OpenTabletDriver.rpm"
 )
 
-
-
 declare -A device_packages
-device_packages[desktop]="plasma-systemmonitor timeshift konsole-part"
+device_packages[desktop]="plasma-systemmonitor timeshift konsole-part kde-print-manager"
 device_packages[laptop]="htop"
 
 grub_conf=(
@@ -94,7 +86,7 @@ clean=(
 )
 
 ##### CHECK FOR SUDO or ROOT #####
-if ! [ $(id -u) = 0 ]; then
+if [[ $EUID != 0 ]]; then
   echo "This script must be run as sudo or root, try again..."
   exit 1
 fi
@@ -154,9 +146,7 @@ echo "The command (systemctl --user enable opentabletdriver.service --now) will 
 dracut --regenerate-all --force
 
 echo "Configuring Software..."
-main_packages+=(jq)
-api_url="https://api.github.com/repos/Fazzoc/Fedora-Minimal-Setup/contents/Configs"
-curl -s $api_url | jq -r '.[] | .download_url' | xargs -n 1 curl -O -L
+svn export https://github.com/Fazzoc/Fedora-Minimal-Setup/trunk/Configs
 
 cp -r Configs/Main/ $HOME/
 cp -r Configs/$device_type/ $HOME/
