@@ -1,4 +1,4 @@
 ## Run install script
 ```Bash
-curl -O https://t.ly/fedora_setup && sudo sh setup
+curl -O https://sor.bz/fedora-setup && sudo sh setup
 ```
