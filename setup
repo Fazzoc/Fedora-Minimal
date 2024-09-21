@@ -71,6 +71,8 @@ main_packages=(
   "./OpenTabletDriver.rpm"
 )
 
+
+
 declare -A device_packages
 device_packages[desktop]="plasma-systemmonitor timeshift konsole-part"
 device_packages[laptop]="htop"
@@ -152,7 +154,9 @@ echo "The command (systemctl --user enable opentabletdriver.service --now) will 
 dracut --regenerate-all --force
 
 echo "Configuring Software..."
-
+main_packages+=(jq)
+api_url="https://api.github.com/repos/Fazzoc/Fedora-Minimal-Setup/contents/Configs"
+curl -s $api_url | jq -r '.[] | .download_url' | xargs -n 1 curl -O -L
 cp -r Configs/Main/* $HOME/
 cp -r Configs/$device_type/* $HOME/
 
