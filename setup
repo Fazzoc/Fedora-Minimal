@@ -125,8 +125,10 @@ echo "Removing unwanted packages.."
 sleep 1
 dnf erase \
   plasma-welcome \
-  audiocd-kio \
-  maliit-keyboard -y --setopt=clean_requirements_on_remove=False
+  audiocd-kio -y
+
+rpm -e --nodeps \
+  maliit-keyboard
 
 printf "Stage 2 - Cofiguring system\nConfiguring Boot parameters...\n"
 plymouth-set-default-theme bgrt -R
