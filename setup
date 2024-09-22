@@ -83,6 +83,8 @@ grub_conf=(
 clean=(
 "setup"
 "OpenTabletDriver.rpm"
+".git"
+"Config"
 )
 
 ##### CHECK FOR SUDO or ROOT #####
@@ -146,7 +148,11 @@ echo "The command (systemctl --user enable opentabletdriver.service --now) will 
 dracut --regenerate-all --force
 
 echo "Configuring Software..."
-svn export https://github.com/Fazzoc/Fedora-Minimal-Setup/trunk/Configs
+git init
+git remote add origin https://github.com/Fazzoc/Fedora-Minimal-Setup.git
+git sparse-checkout init --cone
+git sparse-checkout set Configs
+git pull origin main
 
 cp -r Configs/Main/ $HOME/
 cp -r Configs/$device_type/ $HOME/
