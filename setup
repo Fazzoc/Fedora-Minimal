@@ -61,6 +61,7 @@ main_packages=(
   "gnome-disk-utility"
   "util-linux-user"
   "wget"
+  "flatpak"
   "./OpenTabletDriver.rpm"
 )
 
@@ -97,7 +98,7 @@ sleep 1
 curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
 dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
-dnf install "${main_packages[@]}" -y
+dnf install --setopt=install_weak_deps=False "${main_packages[@]}"
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
@@ -124,6 +125,7 @@ dnf update -y
 
 echo "Removing unwanted packages.."
 sleep 1
+dnf autoremove -y
 dnf erase \
   plasma-welcome \
   audiocd-kio -y
