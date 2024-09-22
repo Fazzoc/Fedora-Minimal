@@ -14,7 +14,6 @@ main_packages=(
   "colord-kde"
   "cups-pk-helper"
   "dolphin"
-  "subversion"
   "glibc-all-langpacks"
   "gnome-keyring-pam"
   "kcm_systemd"
@@ -98,7 +97,7 @@ sleep 1
 curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
 dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
-dnf install --setopt=install_weak_deps=false "${main_packages[@]}" -y
+dnf install "${main_packages[@]}" -y
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
