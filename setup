@@ -61,7 +61,6 @@ main_packages=(
   "gnome-disk-utility"
   "util-linux-user"
   "wget"
-  "flatpak"
   "./OpenTabletDriver.rpm"
 )
 
@@ -98,7 +97,7 @@ sleep 1
 curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
 dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
-dnf install --setopt=install_weak_deps=False "${main_packages[@]}"
+dnf install "${main_packages[@]}" -y
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
@@ -149,11 +148,7 @@ echo "The command (systemctl --user enable opentabletdriver.service --now) will 
 dracut --regenerate-all --force
 
 echo "Configuring Software..."
-git init
-git remote add origin https://github.com/Fazzoc/Fedora-Minimal-Setup.git
-git sparse-checkout init --cone
-git sparse-checkout set Configs
-git pull origin main
+## idk how this'll be done yet ##
 
 cp -r Configs/Main/ $HOME/
 cp -r Configs/$device_type/ $HOME/
