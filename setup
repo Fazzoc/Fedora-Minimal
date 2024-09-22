@@ -1,5 +1,38 @@
 #!/bin/env bash
 
+##### Progerss Bar #####
+total_steps=10
+current_step=0
+
+progress_update() {
+    current_step=$((current_step + 1))
+    progress=$((current_step * 100 / total_steps))
+    
+    term_width=$(tput cols)
+    term_height=$(tput lines)
+    
+    completed=$((progress * term_width / 100))
+    remaining=$((term_width - completed))
+    
+    progress_bar=$(printf "%0.s#" $(seq 1 $completed))$(printf "%0.s-" $(seq 1 $remaining))
+
+    printf "\033[2J"
+    printf "\033[${term_height};0H"
+    printf "\033[K"
+
+    printf "%*s\n%s" $(( (term_width + ${#1} + 7) / 2)) "$1 [$progress%]" "$progress_bar"
+}
+
+show_prompt() {
+    term_height=$(tput lines)
+
+    printf "\033[${term_height};0H\033[2A\033[K"
+
+    read -p "$1" response
+    
+    echo "$response"
+}
+
 #### Package Lists ####
 main_packages=(
   "kernel-cachyos"
@@ -56,12 +89,12 @@ main_packages=(
   "fastfetch"
   "tar"
   "vlc"
+  "pv"
   "okular"
   "bleachbit"
   "gnome-disk-utility"
   "util-linux-user"
   "wget"
-  "flatpak"
   "./OpenTabletDriver.rpm"
 )
 
@@ -94,80 +127,83 @@ if [[ $EUID != 0 ]]; then
 fi
 
 ##### PACKAGE SETUP #####
-printf "Stage 1 - package setup\nInstalling packages.."
-sleep 1
-curl -sLO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
-dnf copr enable bieszczaders/kernel-cachyos -y
-dnf copr enable bieszczaders/kernel-cachyos-addons -y
-dnf install --setopt=install_weak_deps=False "${main_packages[@]}"
+progress_update "Stage 1 - Package setup"
+{
+  curl -sLO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
+  dnf copr enable bieszczaders/kernel-cachyos -y
+  dnf copr enable bieszczaders/kernel-cachyos-addons -y
+  dnf install "${main_packages[@]}" -y
 
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
+  flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
+} > /dev/null 2>&1
 
 while true; do
-read -p "Hey, There's some more packages to install!
-To continue further, type in which device you are using - (D)esktop|(l)aptop:" choice
+read -p "Hey, There's some more packages to install! To continue further, type in which device you are using - (D)esktop|(l)aptop:" choice
   choice=${choice:-d}
   case "${choice,,}" in
-      d) device_type="desktop" ;;
-      l) device_type="laptop" ;;
-      *) echo "Invalid input. Please try again."; continue ;;
-  esac
-  
-  printf "Continuing install for ${device_type^}...\nThe rest of the setup will remember the device!"
-  sleep 1
-  dnf install ${device_packages[$device_type]} -y
-  break
+        d) device_type="desktop" ;;
+        l) device_type="laptop" ;;
+        *) echo "Invalid input. Please try again.";;
+    esac
+
+    printf "Continuing install for ${device_type^}... (The rest of the setup will remember the device!)"
+
+    dnf install ${device_packages[$device_type]} -y > /dev/null 2>&1
+    break
 done
 
-echo "Updating packages.."
-sleep 1
-dnf update -y
+progress_update "Updating packages..."
+dnf update -y > /dev/null 2>&1
 
-echo "Removing unwanted packages.."
-sleep 1
-dnf autoremove -y
-dnf erase \
-  plasma-welcome \
-  audiocd-kio -y
+progress_update "Removing unsued packages..."
+{
+  dnf autoremove -y
+  dnf erase \
+    plasma-welcome \
+    audiocd-kio -y
 
-rpm -e --nodeps \
-  maliit-keyboard
+  rpm -e --nodeps \
+    maliit-keyboard
+} > /dev/null 2>&1
 
 ##### SYSTEM SETUP #####
-printf "Stage 2 - Cofiguring system\nConfiguring Boot parameters...\n"
-plymouth-set-default-theme bgrt -R
-setsebool -P domain_kernel_load_modules on
+    progress_update "Stage 2 - Configuring system"
+{
+  plymouth-set-default-theme bgrt -R
+  setsebool -P domain_kernel_load_modules on
 
-printf '%s\n' "${grub_conf[@]}" > /etc/default/grub
-grub2-mkconfig -o /boot/grub2/grub.cfg
+  printf '%s\n' "${grub_conf[@]}" > /etc/default/grub
+  grub2-mkconfig -o /boot/grub2/grub.cfg
 
-echo "Configuring Services..."
-systemctl enable sddm
-systemctl enable uksmd.service
-systemctl set-default graphical.target
-systemctl disable NetworkManager-wait-online.service
-echo "The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
-dracut --regenerate-all --force
+  progress_update "Configuring Services..."
+  systemctl enable sddm
+  systemctl enable uksmd.service
+  systemctl set-default graphical.target
+  systemctl disable NetworkManager-wait-online.service
+  printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
+  sleep 3
+  dracut --regenerate-all --force
 
-##### idk how this'll be done yet #####
-echo "Configuring Software..."
-##### THis line is to download config files that'll be copied over to the home directory #####
-cp -r Configs/Main/ $HOME/
-cp -r Configs/$device_type/ $HOME/
+  ##### idk how this'll be done yet #####
+  progress_update "Configuring Software..."
+  ##### THis line is to download config files that'll be copied over to the home directory #####
+  # cp -r Configs/Main/ $HOME/ > /dev/null 2>&1 #
+  # cp -r Configs/$device_type/ $HOME/ > /dev/null 2>&1 #
+} > /dev/null 2>&1
 
+progress_update "Setup Complete! Please reboot for all changes to take effect."
 while true; do
-read -p "Setup Complete! Please reboot for all changes to take effect.
-Would you like to reboot now? (Y|n):" choice
+  reboot_choice=$(show_prompt "Would you like to reboot now? (Y|n): ")
   choice=${choice:-y}
-  case "${choice,,}" in
-      y) echo "Rebooting now..."
-         rm "${clean[@]}"
-         reboot
-         exit 0 ;;
-      n) rm "${clean[@]}"
-         echo "Reboot cancelled. Please remember to reboot your system later."
-         break ;;
-      *) echo "Invalid input. Please try again." ;;
+    case "${choice,,}" in
+        y) echo "Rebooting now..."
+           rm "${clean[@]}"
+           reboot
+           exit 0 ;;
+        n) rm "${clean[@]}"
+           echo "Reboot cancelled. Please remember to reboot your system later."
+           break ;;
+        *) echo "Invalid input. Please try again." ;;
     esac
 done
