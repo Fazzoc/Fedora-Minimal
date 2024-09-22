@@ -93,12 +93,13 @@ if [[ $EUID != 0 ]]; then
   exit 1
 fi
 
+##### PACKAGE SETUP #####
 printf "Stage 1 - package setup\nInstalling packages.."
 sleep 1
-curl -LO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
+curl -sLO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
 dnf copr enable bieszczaders/kernel-cachyos -y
 dnf copr enable bieszczaders/kernel-cachyos-addons -y
-dnf install --setopt=install_weak_deps=False "${main_packages[@]}" -y
+dnf install --setopt=install_weak_deps=False "${main_packages[@]}"
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
@@ -133,6 +134,7 @@ dnf erase \
 rpm -e --nodeps \
   maliit-keyboard
 
+##### SYSTEM SETUP #####
 printf "Stage 2 - Cofiguring system\nConfiguring Boot parameters...\n"
 plymouth-set-default-theme bgrt -R
 setsebool -P domain_kernel_load_modules on
@@ -148,9 +150,9 @@ systemctl disable NetworkManager-wait-online.service
 echo "The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
 dracut --regenerate-all --force
 
+##### idk how this'll be done yet #####
 echo "Configuring Software..."
-## idk how this'll be done yet ##
-
+##### THis line is to download config files that'll be copied over to the home directory #####
 cp -r Configs/Main/ $HOME/
 cp -r Configs/$device_type/ $HOME/
 
