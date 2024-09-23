@@ -135,7 +135,7 @@ progress_update "Stage 1 - Package setup"
   dnf install "${main_packages[@]}" -y
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
+  flatpak install io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
 } > /dev/null 2>&1
 
 while true; do
