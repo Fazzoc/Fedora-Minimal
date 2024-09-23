@@ -229,7 +229,7 @@ while true; do
     case "${reboot_choice,,}" in
         y) echo "Rebooting now..."
            rm "${clean[@]}"
-           reboot
+           reboot ;;
         n) rm "${clean[@]}"
            echo "Reboot cancelled. Please remember to reboot your system later."
            break ;;
