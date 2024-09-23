@@ -1,35 +1,67 @@
 #!/bin/env bash
 
 ##### Progerss Bar #####
-total_steps=10
+total_steps=7
 current_step=0
+
+display_centered_progress() {
+    local message="$1"
+    local progress="$2"
+    local term_width=$(tput cols)
+    local term_height=$(tput lines)
+    local bar_width=100
+    local max_width=$((bar_width + 4))
+    local completed=$((progress * bar_width / 100))
+    local remaining=$((bar_width - completed))
+    
+    local progress_bar=$(printf "\033[42m%*s\033[0m%*s" "$completed" "" "$remaining" "")
+    
+    # Truncate message if it's too long
+    local truncated_message=$(echo "$message" | cut -c 1-$bar_width)
+    
+    # Clear screen
+    printf "\033[2J"
+    
+    # Calculate starting position to center vertically
+    local start_row=$(( (term_height - 4) / 2 ))
+    
+    # Print top border
+    printf "\033[%d;%dH\033[34m┌%s┐\033[0m" "$start_row" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    
+    # Print message with stage and percentage
+    printf "\033[%d;%dH\033[34m│\033[0m %*s%s%*s \033[34m│\033[0m" "$((start_row + 1))" $(( (term_width - max_width) / 2 )) $(( (bar_width - ${#truncated_message}) / 2 )) "" "$truncated_message" $(( (bar_width - ${#truncated_message} + 1) / 2 )) ""
+    
+    # Print progress bar
+    printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" $(( (term_width - max_width) / 2 )) "$progress_bar"
+    
+    # Print bottom border
+    printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((start_row + 3))" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    
+    # Move cursor below the progress bar
+    printf "\033[%d;0H" "$((start_row + 5))"
+}
 
 progress_update() {
     current_step=$((current_step + 1))
     progress=$((current_step * 100 / total_steps))
+    current_stage="$1"
     
-    term_width=$(tput cols)
-    term_height=$(tput lines)
-    
-    completed=$((progress * term_width / 100))
-    remaining=$((term_width - completed))
-    
-    progress_bar=$(printf "%0.s#" $(seq 1 $completed))$(printf "%0.s-" $(seq 1 $remaining))
-
-    printf "\033[2J"
-    printf "\033[${term_height};0H"
-    printf "\033[K"
-
-    printf "%*s\n%s" $(( (term_width + ${#1} + 7) / 2)) "$1 [$progress%]" "$progress_bar"
+    if [ "$2" != "no_display" ]; then
+        display_centered_progress "$current_stage" $progress
+    fi
 }
 
 show_prompt() {
-    term_height=$(tput lines)
+  # Clear the screen
+    printf "\033[2J"
+    printf "\033[0;0H"
 
-    printf "\033[${term_height};0H\033[2A\033[K"
-
+    # Show the prompt and get user input
     read -p "$1" response
-    
+
+    # Redisplay the progress bar
+    progress_update "$current_stage"
+
     echo "$response"
 }
 
@@ -116,7 +148,6 @@ grub_conf=(
 clean=(
 "setup"
 "OpenTabletDriver.rpm"
-".git"
 )
 
 ##### CHECK FOR SUDO or ROOT #####
@@ -139,8 +170,8 @@ progress_update "Stage 1 - Package setup"
 
 while true; do
 read -p "Hey, There's some more packages to install! To continue further, type in which device you are using - (D)esktop|(l)aptop:" choice
-  choice=${choice:-d}
-  case "${choice,,}" in
+    choice=${choice:-d}
+    case "${choice,,}" in
         d) device_type="desktop" ;;
         l) device_type="laptop" ;;
         *) echo "Invalid input. Please try again.";;
@@ -193,13 +224,12 @@ progress_update "Removing unsued packages..."
 
 progress_update "Setup Complete! Please reboot for all changes to take effect."
 while true; do
-  reboot_choice=$(show_prompt "Would you like to reboot now? (Y|n): ")
-  choice=${choice:-y}
-    case "${choice,,}" in
+  read -p "Would you like to reboot now? (Y|n):" reboot_choice
+  reboot_choice=${reboot_choice:-y}
+    case "${reboot_choice,,}" in
         y) echo "Rebooting now..."
            rm "${clean[@]}"
            reboot
-           exit 0 ;;
         n) rm "${clean[@]}"
            echo "Reboot cancelled. Please remember to reboot your system later."
            break ;;
