@@ -191,7 +191,7 @@ progress_update "Removing unsued packages..."
   # cp -r Configs/$device_type/ $HOME/ > /dev/null 2>&1 #
 } > /dev/null 2>&1
 
-progress_update "Setup Complete! Please reboot for all changes to take effect."
+printf  "Setup Complete! Please reboot for all changes to take effect."
 while true; do
   reboot_choice=$(show_prompt "Would you like to reboot now? (Y|n): ")
   choice=${choice:-y}
