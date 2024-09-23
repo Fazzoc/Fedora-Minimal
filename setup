@@ -117,7 +117,6 @@ clean=(
 "setup"
 "OpenTabletDriver.rpm"
 ".git"
-"Config"
 )
 
 ##### CHECK FOR SUDO or ROOT #####
