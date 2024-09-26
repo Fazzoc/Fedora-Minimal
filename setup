@@ -121,7 +121,6 @@ main_packages=(
   "fastfetch"
   "tar"
   "vlc"
-  "pv"
   "okular"
   "bleachbit"
   "gnome-disk-utility"
@@ -229,7 +228,7 @@ while true; do
     case "${reboot_choice,,}" in
         y) echo "Rebooting now..."
            rm "${clean[@]}"
-           reboot ;;
+           dnf system-upgrade reboot ;;
         n) rm "${clean[@]}"
            echo "Reboot cancelled. Please remember to reboot your system later."
            break ;;
