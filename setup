@@ -15,29 +15,15 @@ display_centered_progress() {
     local remaining=$((bar_width - completed))
     
     local progress_bar=$(printf "\033[42m%*s\033[0m%*s" "$completed" "" "$remaining" "")
-    
-    # Truncate message if it's too long
-    local truncated_message=$(echo "$message" | cut -c 1-$bar_width)
-    
-    # Clear screen
-    printf "\033[2J"
-    
-    # Calculate starting position to center vertically
+    local message_with_percentage="$message (${progress}%)"
+    local truncated_message=$(echo "$message_with_percentage" | cut -c 1-$bar_width)
     local start_row=$(( (term_height - 4) / 2 ))
     
-    # Print top border
+    printf "\033[2J"  # Clear screen
     printf "\033[%d;%dH\033[34m┌%s┐\033[0m" "$start_row" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
-    
-    # Print message with stage and percentage
     printf "\033[%d;%dH\033[34m│\033[0m %*s%s%*s \033[34m│\033[0m" "$((start_row + 1))" $(( (term_width - max_width) / 2 )) $(( (bar_width - ${#truncated_message}) / 2 )) "" "$truncated_message" $(( (bar_width - ${#truncated_message} + 1) / 2 )) ""
-    
-    # Print progress bar
     printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" $(( (term_width - max_width) / 2 )) "$progress_bar"
-    
-    # Print bottom border
     printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((start_row + 3))" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
-    
-    # Move cursor below the progress bar
     printf "\033[%d;0H" "$((start_row + 5))"
 }
 
