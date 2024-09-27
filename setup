@@ -1,12 +1,13 @@
 #!/bin/env bash
 
 ##### Progerss Bar #####
-total_steps=7
+total_steps=8
 current_step=0
 
 display_centered_progress() {
     local message="$1"
-    local progress="$2"
+    local subtitle="$2"
+    local progress="$3"
     local term_width=$(tput cols)
     local term_height=$(tput lines)
     local bar_width=100
@@ -15,44 +16,38 @@ display_centered_progress() {
     local remaining=$((bar_width - completed))
     
     local progress_bar=$(printf "\033[42m%*s\033[0m%*s" "$completed" "" "$remaining" "")
-    local message_with_percentage="$message (${progress}%)"
+    local message_with_subtitle="$message${subtitle:+ ($subtitle)}"
+    local message_with_percentage="[$progress%] $message_with_subtitle"
     local truncated_message=$(echo "$message_with_percentage" | cut -c 1-$bar_width)
     local start_row=$(( (term_height - 4) / 2 ))
     
-    printf "\033[2J"  # Clear screen
-    printf "\033[%d;%dH\033[34m┌%s┐\033[0m" "$start_row" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    printf "\033[2J"
+    printf "\033[%d;%dH\033[34m╭%s╮\033[0m" "$start_row" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
     printf "\033[%d;%dH\033[34m│\033[0m %*s%s%*s \033[34m│\033[0m" "$((start_row + 1))" $(( (term_width - max_width) / 2 )) $(( (bar_width - ${#truncated_message}) / 2 )) "" "$truncated_message" $(( (bar_width - ${#truncated_message} + 1) / 2 )) ""
     printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" $(( (term_width - max_width) / 2 )) "$progress_bar"
-    printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((start_row + 3))" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;%dH\033[34m╰%s╯\033[0m" "$((start_row + 3))" $(( (term_width - max_width) / 2 )) "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
     printf "\033[%d;0H" "$((start_row + 5))"
 }
 
 progress_update() {
     current_step=$((current_step + 1))
     progress=$((current_step * 100 / total_steps))
-    current_stage="$1"
     
-    if [ "$2" != "no_display" ]; then
-        display_centered_progress "$current_stage" $progress
-    fi
+    current_stage="${1:-$current_stage}"
+    subtitle="$2"
+    
+    [ "$3" != "no_display" ] && display_centered_progress "$current_stage" "$subtitle" $progress
 }
 
 show_prompt() {
-  # Clear the screen
-    printf "\033[2J"
-    printf "\033[0;0H"
-
-    # Show the prompt and get user input
+    printf "\033[2J\033[0;0H"
     read -p "$1" response
-
-    # Redisplay the progress bar
     progress_update "$current_stage"
-
     echo "$response"
 }
 
 #### Package Lists ####
-main_packages=(
+base_packages=(
   "kernel-cachyos"
   "uksmd"
   "@Fonts"
@@ -95,7 +90,7 @@ main_packages=(
   "plasma-user-manager"
   "plasma-workspace"
   "plasma-workspace-geolocation"
-  "plymouth-theme-spinner"
+  "plymouth-theme-breeze"
   "polkit-kde"
   "qt5-qtbase-gui"
   "qt5-qtdeclarative"
@@ -111,13 +106,15 @@ main_packages=(
   "bleachbit"
   "gnome-disk-utility"
   "util-linux-user"
+  "steam"
   "wget"
   "./OpenTabletDriver.rpm"
 )
 
-declare -A device_packages
-device_packages[desktop]="plasma-systemmonitor timeshift konsole-part kde-print-manager"
-device_packages[laptop]="htop"
+device_packages=(
+  [desktop]="plasma-systemmonitor timeshift konsole-part kde-print-manager"
+  [laptop]="htop"
+)
 
 grub_conf=(
   "GRUB_TIMEOUT=1"
@@ -130,10 +127,7 @@ grub_conf=(
   "GRUB_ENABLE_BLSCFG=true"
 )
 
-clean=(
-"setup"
-"OpenTabletDriver.rpm"
-)
+clean=("setup" "OpenTabletDriver.rpm")
 
 ##### CHECK FOR SUDO or ROOT #####
 if [[ $EUID != 0 ]]; then
@@ -141,68 +135,69 @@ if [[ $EUID != 0 ]]; then
   exit 1
 fi
 
-##### PACKAGE SETUP #####
-progress_update "Stage 1 - Package setup"
-{
-  curl -sLO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
-  dnf copr enable bieszczaders/kernel-cachyos -y
-  dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  dnf install "${main_packages[@]}" -y
-
-  flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
-} > /dev/null 2>&1
-
 while true; do
-read -p "Hey, There's some more packages to install! To continue further, type in which device you are using - (D)esktop|(l)aptop:" choice
+read -p "Hey! To begin this setup, select your desired device - (D)esktop|(l)aptop:" choice
     choice=${choice:-d}
     case "${choice,,}" in
         d) device_type="desktop" ;;
         l) device_type="laptop" ;;
         *) echo "Invalid input. Please try again.";;
     esac
-
-    printf "Continuing install for ${device_type^}... (The rest of the setup will remember the device!)"
-
-    dnf install ${device_packages[$device_type]} -y > /dev/null 2>&1
+    printf "Thank you. The rest of the setup will remember your device!"
     break
 done
 
-progress_update "Updating packages..."
+##### PACKAGE SETUP #####
+progress_update "Stage 1 - Package setup" "Installing base packages..."
+{
+  curl -sLO https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
+  dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+  dnf config-manager --enable fedora-cisco-openh264 -y
+  dnf copr enable bieszczaders/kernel-cachyos -y
+  dnf copr enable bieszczaders/kernel-cachyos-addons -y
+  dnf install "${base_packages[@]}" -y
+
+  flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  flatpak install io.gitlab.librewolf-community org.onlyoffice.desktopeditors -y
+} > /dev/null 2>&1
+
+progress_update "" "Installing device packages..."
+dnf install ${device_packages[$device_type]} -y > /dev/null 2>&1
+
+progress_update "" "Updating packages..."
 dnf update -y > /dev/null 2>&1
 
-progress_update "Removing unsued packages..."
+progress_update "" "Removing unsued packages..."
 {
   dnf autoremove -y
-  dnf erase \
-    plasma-welcome \
-    audiocd-kio -y
-
-  rpm -e --nodeps \
-    maliit-keyboard
+  dnf erase plasma-welcome audiocd-kio -y
+  rpm -e --nodeps maliit-keyboard
 } > /dev/null 2>&1
 
 ##### SYSTEM SETUP #####
-    progress_update "Stage 2 - Configuring system"
+progress_update "Stage 2 - Configuring system"
 {
-  plymouth-set-default-theme bgrt -R
+  plymouth-set-default-theme breeze -R
   setsebool -P domain_kernel_load_modules on
 
   printf '%s\n' "${grub_conf[@]}" > /etc/default/grub
   grub2-mkconfig -o /boot/grub2/grub.cfg
+}
 
-  progress_update "Configuring Services..."
-  systemctl enable sddm
-  systemctl enable uksmd.service
+progress_update "" "Configuring Services..."
+{
+  systemctl enable sddm uksmd.service
   systemctl set-default graphical.target
-  systemctl disable NetworkManager-wait-online.service
-  printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot."
-  sleep 3
+  systemctl disable NetworkManager-wait-online.service 
   dracut --regenerate-all --force
 
-  ##### idk how this'll be done yet #####
-  progress_update "Configuring Software..."
-  ##### THis line is to download config files that'll be copied over to the home directory #####
+  # printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot." #
+} > /dev/null 2>&1
+
+progress_update "" "Configuring Software..."
+{
+  sleep 3
+  ##### The lines below will be used to download and copy config files to the user's home directory. #####
   # cp -r Configs/Main/ $HOME/ > /dev/null 2>&1 #
   # cp -r Configs/$device_type/ $HOME/ > /dev/null 2>&1 #
 } > /dev/null 2>&1
@@ -212,8 +207,7 @@ while true; do
   read -p "Would you like to reboot now? (Y|n):" reboot_choice
   reboot_choice=${reboot_choice:-y}
     case "${reboot_choice,,}" in
-        y) echo "Rebooting now..."
-           rm "${clean[@]}"
+        y) rm "${clean[@]}"
            reboot ;;
         n) rm "${clean[@]}"
            echo "Reboot cancelled. Please remember to reboot your system later."
