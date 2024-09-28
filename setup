@@ -182,7 +182,7 @@ progress_update "Stage 2 - Configuring system"
 
   printf '%s\n' "${grub_conf[@]}" > /etc/default/grub
   grub2-mkconfig -o /boot/grub2/grub.cfg
-}
+} > /dev/null 2>&1
 
 progress_update "" "Configuring Services..."
 {
