@@ -1,8 +1,8 @@
 #!/bin/env bash
 
 ##### Progerss Bar #####
-total_steps=8
-current_step=0
+total_steps=7
+current_step=-1
 
 display_centered_progress() {
     local message="$1"
