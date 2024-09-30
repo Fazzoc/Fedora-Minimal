@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 ##### Progerss Bar #####
-total_steps=6
+total_steps=7
 current_step=-1
 
 display_centered_progress() {
@@ -132,7 +132,7 @@ grub_conf=(
   "GRUB_ENABLE_BLSCFG=true"
 )
 
-clean=("setup" "OpenTabletDriver.rpm")
+clean=("setup")
 
 ##### CHECK FOR SUDO or ROOT #####
 if [[ $EUID != 0 ]]; then
@@ -158,11 +158,14 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
   dnf config-manager --enable fedora-cisco-openh264 -y
   dnf copr enable bieszczaders/kernel-cachyos bieszczaders/kernel-cachyos-addons -y
-  dnf install "${base_packages[@]}" ${device_packages[$device_type]} -y
+  dnf install "${base_packages[@]}" -y
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[@]} -y
 } > /dev/null 2>&1
+
+progress_update "" "Installing device packages..."
+  dnf install ${device_packages[$device_type]} -y > /dev/null 2>&1
 
 progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
