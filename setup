@@ -108,7 +108,7 @@ base_packages=(
   "util-linux-user"
   "steam"
   "wget"
-  ##"https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"##
+  https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
 flatpaks=(
