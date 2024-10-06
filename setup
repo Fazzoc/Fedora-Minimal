@@ -20,16 +20,15 @@ display_centered_progress() {
     local start_row=$(( (term_height - 4) / 2 ))
     local start_col=$(( (term_width - max_width) / 2 ))
     
-    printf "\033[2J"
-    printf "\033[%d;%dH\033[34m╭%s╮\033[0m" "$start_row" "$start_col" "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    printf "\033[2J\033[%d;%dH\033[34m╭%s╮\033[0m" "$start_row" "$start_col" "$(printf '─%.0s' $(seq 1 $((max_width - 2))))"
     printf "\033[%d;%dH\033[34m│\033[0m %-${bar_width}s \033[34m│\033[0m" "$((start_row + 1))" "$start_col" "$(printf "%*s%s" $(( (bar_width - ${#truncated_message}) / 2 )) "" "$truncated_message")"
     printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" "$start_col" "$progress_bar"
-    printf "\033[%d;%dH\033[34m╰%s╯\033[0m" "$((start_row + 3))" "$start_col" "$(printf "%0.s─" $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;%dH\033[34m╰%s╯\033[0m" "$((start_row + 3))" "$start_col" "$(printf '─%.0s' $(seq 1 $((max_width - 2))))"
     printf "\033[%d;0H" "$((start_row + 5))"
 }
 
 progress_update() {
-    current_step=$((current_step + 1))
+    ((current_step++))
     progress=$((current_step * 100 / total_steps))
     
     current_stage="${1:-$current_stage}"
@@ -90,6 +89,7 @@ base_packages=(
   "plasma-workspace"
   "plasma-workspace-geolocation"
   "plymouth-theme-breeze"
+  "plymouth-plugin-label"
   "polkit-kde"
   "qt5-qtbase-gui"
   "qt5-qtdeclarative"
@@ -100,7 +100,6 @@ base_packages=(
   "git"
   "fastfetch"
   "tar"
-  "vlc"
   "okular"
   "bleachbit"
   "gnome-disk-utility"
@@ -113,6 +112,7 @@ base_packages=(
 flatpaks=(
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
+  "org.videolan.VLC"
 )
 
 device_packages=(
@@ -140,14 +140,13 @@ if [[ $EUID != 0 ]]; then
 fi
 
 while true; do
-read -p "Hey! To begin this setup, select your desired device - (D)esktop|(l)aptop:" choice
-    choice=${choice:-d}
-    case "${choice,,}" in
-        d) device_type="desktop" ;;
-        l) device_type="laptop" ;;
-        *) echo "Invalid input. Please try again.";;
+  read -p "Hey! To begin this setup, select your desired device - (D)esktop|(l)aptop:" choice
+   case "${choice,,}" in
+    d|"") device_type="desktop";;
+       l) device_type="laptop";;
+       *) echo "Invalid input. Please try again."
+      continue;;
     esac
-    printf "Thank you. The rest of the setup will remember your device!"
     break
 done
 
@@ -187,8 +186,8 @@ progress_update "Stage 2 - Configuring system"
 progress_update "" "Configuring Services..." # printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot." #
 {
   systemctl enable sddm uksmd.service
-  systemctl set-default graphical.target
   systemctl disable NetworkManager-wait-online.service 
+  systemctl set-default graphical.target
   dracut --regenerate-all --force
 } > /dev/null 2>&1
 
@@ -197,16 +196,15 @@ progress_update "" "Configuring Software..." ##### This area will be used to dow
   sleep 2
 } > /dev/null 2>&1
 
-progress_update  "Setup Complete! Please reboot for all changes to take effect."
+progress_update "Setup Complete! Please reboot for all changes to take effect."
 while true; do
   read -p "Would you like to reboot now? (Y|n):" reboot_choice
-  reboot_choice=${reboot_choice:-y}
-    case "${reboot_choice,,}" in
-        y) rm "${clean[@]}"
-           reboot ;;
-        n) rm "${clean[@]}"
-           echo "Reboot cancelled. Please remember to reboot your system later."
-           break ;;
-        *) echo "Invalid input. Please try again." ;;
-    esac
+   case "${reboot_choice,,}" in
+    y|"") rm "${clean[@]}"
+          reboot;;
+       n) rm "${clean[@]}"
+          echo "Reboot cancelled. Please remember to reboot your system later."
+          break;;
+       *) echo "Invalid input. Please try again.";;
+   esac
 done
