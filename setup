@@ -168,7 +168,7 @@ progress_update "" "Updating packages..."
 
 progress_update "" "Removing unsued packages..."
 {
-  dnf erase plasma-welcome audiocd-kio -y
+  dnf remove plasma-welcome audiocd-kio -y
   dnf autoremove -y
   rpm -e --nodeps maliit-keyboard
 } > /dev/null 2>&1
