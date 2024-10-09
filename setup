@@ -106,13 +106,13 @@ base_packages=(
   "util-linux-user"
   "steam"
   "wget"
+  "vlc"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
 flatpaks=(
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
-  "org.videolan.VLC"
 )
 
 device_packages=(
