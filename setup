@@ -188,7 +188,7 @@ progress_update "" "Configuring Services..." # printf "Note: The command (system
   systemctl enable sddm uksmd.service
   systemctl disable NetworkManager-wait-online.service 
   systemctl set-default graphical.target
-  dracut --regenerate-all --force
+  dracut -f
 } > /dev/null 2>&1
 
 progress_update "" "Configuring Software..." ##### This area will be used to download and copy config files to the user's home directory. #####
