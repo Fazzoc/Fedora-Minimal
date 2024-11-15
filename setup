@@ -39,6 +39,8 @@ progress_update() {
 
 #### Package Lists ####
 packages=(
+  [desktop]="timeshift konsole-part kde-print-manager"
+  [laptop]="htop"
   "kernel-cachyos"
   "uksmd"
   "@Fonts"
@@ -101,9 +103,6 @@ packages=(
   "wget"
   "vlc"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
-  
-  [desktop]="timeshift konsole-part kde-print-manager"
-  [laptop]="htop"
 )
 
 flatpaks=(
