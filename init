@@ -28,7 +28,7 @@ curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setu
 chmod +x "$temp_dir/setup"
 
 sudo "$temp_dir/setup" 2>&1 | while IFS= read -r line; do
-    [[ $line =~ progress_update[[:space:]]*\"([^\"]*)\"[[:space:]]*\"([^\"]*)\" ]] && \
+    [[ $line =~ progress_status[[:space:]]*\"([^\"]*)\"[[:space:]]*\"([^\"]*)\" ]] && \
         display_centered_progress "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
     echo "$line"
 done

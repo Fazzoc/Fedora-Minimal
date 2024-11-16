@@ -1,9 +1,5 @@
 #!/bin/env bash
 
-progress_status() {
-    echo "progress_update \"$1\" \"$2\""
-}
-
 #### Package Lists ####
 packages=(
   [desktop]="timeshift konsole-part kde-print-manager"
