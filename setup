@@ -190,4 +190,3 @@ while true; do
        n) echo "Reboot cancelled. Please remember to reboot your system later."; break;;
     *) echo "Invalid input. Please try again.";;
   esac
-done
