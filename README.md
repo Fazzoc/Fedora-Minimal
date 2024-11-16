@@ -1,4 +1,4 @@
 ## Run install script
-```Bash
+```Shell
 sh <(curl -s https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/init)
 ```
