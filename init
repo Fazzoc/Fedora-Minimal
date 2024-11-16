@@ -1,0 +1,36 @@
+#!/bin/bash
+
+display_centered_progress() {
+    local message="$1"
+    local subtitle="$2"
+    local bar_width=100
+    local max_width=$((bar_width + 4))
+    local term_width=$(tput cols)
+    local term_height=$(tput lines)
+    local start_row=$(( (term_height - 4) / 2 ))
+    local start_col=$(( (term_width - max_width) / 2 ))
+    
+    local message_with_subtitle="${message}${subtitle:+ ($subtitle)}"
+    local progress_bar="\033[42m$(printf "%${bar_width}s")\033[0m"
+    
+    clear
+    printf "\033[%d;%dH\033[34m╭%s╮\033[0m" "$start_row" "$start_col" "$(printf '%.0s─' $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;%dH\033[34m│\033[0m %-${bar_width}s \033[34m│\033[0m" "$((start_row + 1))" "$start_col" "$(printf "%*s%s" $(( (bar_width - ${#message_with_subtitle}) / 2 )) "" "${message_with_subtitle:0:$bar_width}")"
+    printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" "$start_col" "$progress_bar"
+    printf "\033[%d;%dH\033[34m╰%s╯\033[0m\n" "$((start_row + 3))" "$start_col" "$(printf '%.0s─' $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;0H" "$((start_row + 5))"
+    printf "\033[?25h"
+    tput cnorm
+}
+
+temp_dir=$(mktemp -d)
+trap 'rm -rf "$temp_dir"' EXIT
+
+curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
+chmod +x "$temp_dir/setup"
+
+sudo "$temp_dir/setup" 2>&1 | while IFS= read -r line; do
+    [[ $line =~ progress_update[[:space:]]*\"([^\"]*)\"[[:space:]]*\"([^\"]*)\" ]] && \
+        display_centered_progress "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+    echo "$line"
+done
