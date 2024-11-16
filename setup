@@ -186,10 +186,8 @@ progress_update "Setup Complete! Please reboot for all changes to take effect."
 while true; do
   read -p "Would you like to reboot now? (Y|n):" reboot_choice
   case "${reboot_choice,,}" in
-    y|"") rm "${clean[@]}"
-          reboot;;
-       n) rm "${clean[@]}"
-          echo "Reboot cancelled. Please remember to reboot your system later."; break;;
+    y|"") reboot;;
+       n) echo "Reboot cancelled. Please remember to reboot your system later."; break;;
     *) echo "Invalid input. Please try again.";;
   esac
 done
