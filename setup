@@ -1,5 +1,40 @@
 #!/bin/env bash
 
+##### Progerss Bar #####
+total_steps=6
+current_step=-1
+display_centered_progress() {
+    local message="$1"
+    local subtitle="$2"
+    local progress="$3"
+    local term_width=$(tput cols)
+    local term_height=$(tput lines)
+    local bar_width=100
+    local max_width=$((bar_width + 4))
+    local completed=$((progress * bar_width / 100))
+    
+    local progress_bar=$(printf "\033[42m%*s\033[0m%*s" "$completed" "" "$((bar_width - completed))" "")
+    local message_with_subtitle="[$progress%] $message${subtitle:+ ($subtitle)}"
+    local truncated_message=${message_with_subtitle:0:$bar_width}
+    local start_row=$(( (term_height - 4) / 2 ))
+    local start_col=$(( (term_width - max_width) / 2 ))
+    
+    printf "\033[2J\033[%d;%dH\033[34m╭%s╮\033[0m\n" "$start_row" "$start_col" "$(printf '%.0s─' $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;%dH\033[34m│\033[0m %-${bar_width}s \033[34m│\033[0m\n" "$((start_row + 1))" "$start_col" "$(printf "%*s%s" $(( (bar_width - ${#truncated_message}) / 2 )) "" "$truncated_message")"
+    printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m\n" "$((start_row + 2))" "$start_col" "$progress_bar"
+    printf "\033[%d;%dH\033[34m╰%s╯\033[0m\n" "$((start_row + 3))" "$start_col" "$(printf '%.0s─' $(seq 1 $((max_width - 2))))"
+    printf "\033[%d;0H" "$((start_row + 5))"
+}
+progress_update() {
+    ((current_step++))
+    progress=$((current_step * 100 / total_steps))
+    
+    current_stage="${1:-$current_stage}"
+    subtitle="$2"
+    
+    [ "$3" != "no_display" ] && display_centered_progress "$current_stage" "$subtitle" $progress
+}
+
 #### Package Lists ####
 packages=(
   [desktop]="timeshift konsole-part kde-print-manager"
@@ -102,7 +137,7 @@ while true; do
 done
 
 ##### PACKAGE SETUP #####
-progress_status "Stage 1 - Package setup" "Installing packages..."
+progress_update "Stage 1 - Package setup" "Installing packages..."
 {
   dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
   dnf config-manager setopt fedora-cisco-openh264.enabled=1
@@ -114,10 +149,10 @@ progress_status "Stage 1 - Package setup" "Installing packages..."
   flatpak install flathub ${flatpaks[@]} -y
 } > /dev/null 2>&1
 
-progress_status "" "Updating packages..."
+progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
 
-progress_status "" "Erasing unused packages..."
+progress_update "" "Erasing unused packages..."
 {
   dnf remove plasma-welcome audiocd-kio -y
   dnf autoremove -y
@@ -125,7 +160,7 @@ progress_status "" "Erasing unused packages..."
 } > /dev/null 2>&1
 
 ##### SYSTEM SETUP #####
-progress_status "Stage 2 - Configuring system"
+progress_update "Stage 2 - Configuring system"
 {
   plymouth-set-default-theme breeze -R
   setsebool -P domain_kernel_load_modules on
@@ -134,7 +169,7 @@ progress_status "Stage 2 - Configuring system"
   grub2-mkconfig -o /boot/grub2/grub.cfg
 } > /dev/null 2>&1
 
-progress_status "" "Configuring Services..." # printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot." #
+progress_update "" "Configuring Services..." # printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot." #
 {
   systemctl enable sddm uksmd.service
   systemctl disable NetworkManager-wait-online.service 
@@ -142,12 +177,12 @@ progress_status "" "Configuring Services..." # printf "Note: The command (system
   dracut -f
 } > /dev/null 2>&1
 
-progress_status "" "Configuring Software..." ##### This'll be used to download and copy config files to the user's home directory. #####
+progress_update "" "Configuring Software..." ##### This'll be used to download and copy config files to the user's home directory. #####
 {
   sleep 2
 } > /dev/null 2>&1
 
-progress_status "Setup Complete! Please reboot for all changes to take effect."
+progress_update "Setup Complete! Please reboot for all changes to take effect."
 while true; do
   read -p "Would you like to reboot now? (Y|n):" reboot_choice
   case "${reboot_choice,,}" in
