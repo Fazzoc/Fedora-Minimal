@@ -1,9 +1,9 @@
 #!/bin/bash
 
-    temp_dir=$(mktemp -d)
-    trap 'rm -rf "$temp_dir"' EXIT
-    curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
-    chmod +x "$temp_dir/setup"
-    sudo "$temp_dir/setup"
-    echo "$line"
-done
+temp_dir=$(mktemp -d)
+trap 'rm -rf "$temp_dir"' EXIT
+
+curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
+chmod +x "$temp_dir/setup"
+
+sudo "$temp_dir/setup"
