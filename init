@@ -3,7 +3,11 @@
 temp_dir=$(mktemp -d)
 trap 'rm -rf "$temp_dir"' EXIT
 
-curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
-chmod +x "$temp_dir/setup"
+if [ "$1" = "--local" ]; then
+    cp ./setup "$temp_dir/setup"
+else
+    curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
+fi
 
+chmod +x "$temp_dir/setup"
 sudo "$temp_dir/setup"
