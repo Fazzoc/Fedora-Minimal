@@ -6,7 +6,7 @@ trap 'rm -rf "$temp_dir"' EXIT
 if [ "$1" = "--local" ]; then
     cp ./setup "$temp_dir/setup"
 else
-    curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal-Setup/main/setup -o "$temp_dir/setup"
+    curl -sL https://raw.githubusercontent.com/Fazzoc/Fedora-Minimal/main/setup -o "$temp_dir/setup"
 fi
 
 chmod +x "$temp_dir/setup"
