@@ -103,14 +103,14 @@ base_packages=(
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
-flatpaks=(
-  "io.gitlab.librewolf-community"
-  "org.onlyoffice.desktopeditors"
-)
-
 device_packages=(
   [desktop]="timeshift konsole-part kde-print-manager"
   [laptop]="htop"
+)
+
+flatpaks=(
+  "io.gitlab.librewolf-community"
+  "org.onlyoffice.desktopeditors"
 )
 
 device_flatpaks=(
@@ -139,9 +139,8 @@ while true; do
   case "${choice,,}" in
     d|"") device_type="desktop";;
     l) device_type="laptop";;
-    *) echo "Invalid input. Please try again."
-    continue;;
-    esac
+    *) echo "Invalid input. Please try again."; continue;;
+  esac
   break
 done
 
@@ -153,10 +152,10 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
   dnf install "${base_packages[@]}" ${device_packages[$device_type]} -y
-
+  
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub ${flatpaks[@]} -y
-} > /dev/null 2>&1
+  flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
+} 
 
 progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
