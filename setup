@@ -39,68 +39,68 @@ progress_update() {
 
 #### Package Lists ####
 base_packages=(
-  kernel-cachyos
-  uksmd
-  @Fonts
-  amd-gpu-firmware
-  mt7xxx-firmware
-  realtek-firmware
-  dnfdragora
-  bluedevil
-  breeze-icon-theme
-  colord-kde
-  cups-pk-helper
-  dolphin
-  glibc-all-langpacks
-  gnome-keyring-pam
-  kcm_systemd
-  kde-gtk-config
-  kde-settings-pulseaudio
-  kdegraphics-thumbnailers
-  kdeplasma-addons
-  kdialog
-  kdnssd
-  kf5-kipi-plugins
-  kf6-baloo-file
-  kmenuedit
-  kitty
-  kscreen
-  kscreenlocker
-  ksshaskpass
-  kwin
-  kinfocenter
-  krita
-  NetworkManager-config-connectivity-fedora
-  phonon-qt5-backend-gstreamer
-  pinentry-qt
-  plasma-breeze
-  plasma-desktop
-  plasma-discover
-  plasma-nm
-  plasma-pa
-  plasma-user-manager
-  plasma-workspace
-  plasma-workspace-geolocation
-  plymouth-theme-breeze
-  plymouth-plugin-label
-  polkit-kde
-  qt5-qtbase-gui
-  qt5-qtdeclarative
-  sddm
-  sddm-breeze
-  sddm-kcm
-  ark
-  git
-  fastfetch
-  tar
-  okular
-  bleachbit
-  gnome-disk-utility
-  util-linux-user
-  steam
-  wget
-  vlc
-  https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm
+  "kernel-cachyos"
+  "uksmd"
+  "@Fonts"
+  "amd-gpu-firmware"
+  "mt7xxx-firmware"
+  "realtek-firmware"
+  "dnfdragora"
+  "bluedevil"
+  "breeze-icon-theme"
+  "colord-kde"
+  "cups-pk-helper"
+  "dolphin"
+  "glibc-all-langpacks"
+  "gnome-keyring-pam"
+  "kcm_systemd"
+  "kde-gtk-config"
+  "kde-settings-pulseaudio"
+  "kdegraphics-thumbnailers"
+  "kdeplasma-addons"
+  "kdialog"
+  "kdnssd"
+  "kf5-kipi-plugins"
+  "kf6-baloo-file"
+  "kmenuedit"
+  "kitty"
+  "kscreen"
+  "kscreenlocker"
+  "ksshaskpass"
+  "kwin"
+  "kinfocenter"
+  "krita"
+  "NetworkManager-config-connectivity-fedora"
+  "phonon-qt5-backend-gstreamer"
+  "pinentry-qt"
+  "plasma-breeze"
+  "plasma-desktop"
+  "plasma-discover"
+  "plasma-nm"
+  "plasma-pa"
+  "plasma-user-manager"
+  "plasma-workspace"
+  "plasma-workspace-geolocation"
+  "plymouth-theme-breeze"
+  "plymouth-plugin-label"
+  "polkit-kde"
+  "qt5-qtbase-gui"
+  "qt5-qtdeclarative"
+  "sddm"
+  "sddm-breeze"
+  "sddm-kcm"
+  "ark"  
+  "git"
+  "fastfetch"
+  "tar"
+  "okular"
+  "bleachbit"
+  "gnome-disk-utility"
+  "util-linux-user"
+  "steam"
+  "wget"
+  "vlc"
+  "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
 device_packages=(
@@ -109,8 +109,8 @@ device_packages=(
 )
 
 flatpaks=(
-  io.gitlab.librewolf-community
-  org.onlyoffice.desktopeditors
+  "io.gitlab.librewolf-community"
+  "org.onlyoffice.desktopeditors"
 )
 
 device_flatpaks=(
@@ -151,7 +151,7 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf config-manager setopt fedora-cisco-openh264.enabled=1
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  dnf install "${base_packages[@]}" ${device_packages[$device_type]} -y
+  dnf install ${base_packages[@]} ${device_packages[$device_type]} -y
   
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
