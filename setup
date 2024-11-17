@@ -158,7 +158,10 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
 } 
 
 progress_update "" "Updating packages..."
-  dnf update -y > /dev/null 2>&1
+{
+  dnf update -y
+  flatpak update -y
+} > /dev/null 2>&1
 
 progress_update "" "Erasing unused packages..."
 {
@@ -198,3 +201,4 @@ while true; do
        n) echo "Reboot cancelled. Please remember to reboot your system later."; break;;
     *) echo "Invalid input. Please try again.";;
   esac
+done
