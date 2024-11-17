@@ -149,15 +149,11 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf config-manager setopt fedora-cisco-openh264.enabled=1
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  
-  packages_list=$(printf " %s" "${packages[@]}")
-  device_packages_list=$(printf " %s" "${device_packages[$device_type]}")
-
-  dnf install ${packages_list#} ${device_packages_list#} -y
+  dnf install "${packages[@]}" ${device_packages[$device_type]}
   
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
-} > /dev/null 2>&1
+}
 
 progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
