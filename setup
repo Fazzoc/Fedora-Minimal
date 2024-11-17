@@ -3,6 +3,7 @@
 ##### Progerss Bar #####
 total_steps=6
 current_step=-1
+
 display_centered_progress() {
     local message="$1"
     local subtitle="$2"
@@ -25,6 +26,7 @@ display_centered_progress() {
     printf "\033[%d;%dH\033[34m╰%s╯\033[0m\n" "$((start_row + 3))" "$start_col" "$(printf '%.0s─' $(seq 1 $((max_width - 2))))"
     printf "\033[%d;0H" "$((start_row + 5))"
 }
+
 progress_update() {
     ((current_step++))
     progress=$((current_step * 100 / total_steps))
@@ -36,7 +38,7 @@ progress_update() {
 }
 
 #### Package Lists ####
-packages=(
+base_packages=(
   "kernel-cachyos"
   "uksmd"
   "@Fonts"
@@ -101,14 +103,14 @@ packages=(
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
-device_packages=(
-  [desktop]="timeshift konsole-part kde-print-manager"
-  [laptop]="htop"
-)
-
 flatpaks=(
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
+)
+
+device_packages=(
+  [desktop]="timeshift konsole-part kde-print-manager"
+  [laptop]="htop"
 )
 
 device_flatpaks=(
@@ -137,8 +139,9 @@ while true; do
   case "${choice,,}" in
     d|"") device_type="desktop";;
     l) device_type="laptop";;
-    *) echo "Invalid input. Please try again."; continue;;
-  esac
+    *) echo "Invalid input. Please try again."
+    continue;;
+    esac
   break
 done
 
@@ -149,11 +152,11 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf config-manager setopt fedora-cisco-openh264.enabled=1
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  dnf install "${packages[@]}" ${device_packages[$device_type]}
-  
+  dnf install "${base_packages[@]}" ${device_packages[$device_type]} -y
+
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
-}
+  flatpak install flathub ${flatpaks[@]} -y
+} > /dev/null 2>&1
 
 progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
