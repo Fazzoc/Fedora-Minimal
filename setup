@@ -37,8 +37,6 @@ progress_update() {
 
 #### Package Lists ####
 packages=(
-  [desktop]="timeshift konsole-part kde-print-manager"
-  [laptop]="htop"
   "kernel-cachyos"
   "uksmd"
   "@Fonts"
@@ -103,10 +101,18 @@ packages=(
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
+device_packages=(
+  [desktop]="timeshift konsole-part kde-print-manager"
+  [laptop]="htop"
+)
+
 flatpaks=(
-  [desktop]="net.nokyan.Resources"
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
+)
+
+device_flatpaks=(
+  [desktop]="net.nokyan.Resources"
 )
 
 grub_conf=(
@@ -143,11 +149,11 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf config-manager setopt fedora-cisco-openh264.enabled=1
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  dnf install "${packages[@]}" ${packages[$device_type]} -y
+  dnf install "${packages[@]}" ${device_packages[$device_type]} -y
   
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub ${flatpaks[@]} -y
-} > /dev/null 2>&1
+  flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
+} 
 
 progress_update "" "Updating packages..."
   dnf update -y > /dev/null 2>&1
