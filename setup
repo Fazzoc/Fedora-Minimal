@@ -152,7 +152,7 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf copr enable bieszczaders/kernel-cachyos -y
   dnf copr enable bieszczaders/kernel-cachyos-addons -y
   dnf install ${base_packages[@]} ${device_packages[$device_type]} -y
-  
+
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
 } 
@@ -161,7 +161,7 @@ progress_update "" "Updating packages..."
 {
   dnf update -y
   flatpak update -y
-} > /dev/null 2>&1
+}
 
 progress_update "" "Erasing unused packages..."
 {
