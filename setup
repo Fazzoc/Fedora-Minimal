@@ -140,12 +140,12 @@ done
 ##### PACKAGE SETUP #####
 progress_update "Stage 1 - Package setup" "Installing packages..."
 {
-  dnf in https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
-  dnf config-manager setopt fedora-cisco-openh264.enabled=1
-  dnf copr enable bieszczaders/kernel-cachyos -y
-  dnf copr enable bieszczaders/kernel-cachyos-addons -y
-  dnf copr enable deltacopy/lightly-qt6 -y
-  dnf in ${base_packages[@]} ${device_packages[$device_type]} -y
+  dnf -y in https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  dnf -y config-manager setopt fedora-cisco-openh264.enabled=1
+  dnf -y copr enable bieszczaders/kernel-cachyos
+  dnf -y copr enable bieszczaders/kernel-cachyos-addons
+  dnf -y copr enable deltacopy/lightly-qt6
+  dnf -y in ${base_packages[@]} ${device_packages[$device_type]}
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
@@ -153,14 +153,14 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
 
 progress_update "" "Updating packages..."
 {
-  dnf update -y
+  dnf -y update
   flatpak update -y
 }
 
 progress_update "" "Erasing unused packages..."
 {
-  dnf remove plasma-welcome audiocd-kio -y
-  dnf autoremove -y
+  dnf -y remove plasma-welcome audiocd-kio
+  dnf -y autoremove
   rpm -e --nodeps maliit-keyboard
 } > /dev/null 2>&1
 
