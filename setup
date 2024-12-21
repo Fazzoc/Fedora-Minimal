@@ -145,10 +145,10 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf -y copr enable bieszczaders/kernel-cachyos
   dnf -y copr enable bieszczaders/kernel-cachyos-addons
   dnf -y copr enable deltacopy/lightly-qt6
-  dnf -y in ${base_packages[@]} ${device_packages[$device_type]}
+  dnf -y in ${base_packages[*]} ${device_packages[$device_type]}
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-  flatpak install flathub ${flatpaks[@]} ${flatpaks[$device_type]} -y
+  flatpak install flathub ${flatpaks[*]} ${flatpaks[$device_type]} -y
 }
 
 progress_update "" "Updating packages..."
@@ -159,7 +159,7 @@ progress_update "" "Updating packages..."
 
 progress_update "" "Erasing unused packages..."
 {
-  dnf -y remove plasma-welcome audiocd-kio
+  dnf -y rm plasma-welcome audiocd-kio
   dnf -y autoremove
   rpm -e --nodeps maliit-keyboard
 } > /dev/null 2>&1
