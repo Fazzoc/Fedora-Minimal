@@ -5,7 +5,7 @@ total_steps=6
 current_step=-1
 current_stage=""
 
-display_centered_progress() {
+display_progress() {
     local message="$1" subtitle="$2" progress="$3"
     local term_width=$(tput cols) term_height=$(tput lines)
     local bar_width=100 completed=$((progress * bar_width / 100))
