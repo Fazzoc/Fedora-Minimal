@@ -34,6 +34,15 @@ progress_update() {
 
 #### Package Lists ####
 base_packages=(
+  "google-noto-sans-fonts" 
+  "google-noto-serif-fonts"
+  "liberation-fonts"
+  "mozilla-fira-sans-fonts"
+  "mozilla-fira-mono-fonts"
+  "dejavu-sans-fonts"
+  "dejavu-serif-fonts"
+  "fontawesome-fonts"
+  "jetbrains-mono-fonts"
   "kernel-cachyos"
   "cachyos-settings"
   "uksmd"
@@ -42,6 +51,7 @@ base_packages=(
   "realtek-firmware"
   "dnfdragora"
   "bluedevil"
+  "lightly-qt6"
   "dolphin"
   "glibc-all-langpacks"
   "kcm_systemd"
@@ -88,7 +98,6 @@ base_packages=(
   "vlc"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
-
 
 device_packages=(
   [desktop]="timeshift konsole-part kde-print-manager"
@@ -161,7 +170,7 @@ progress_update "" "Erasing unused packages..."
 ##### SYSTEM SETUP #####
 progress_update "Stage 2 - Configuring system"
 {
-  plymouth-set-default-theme breeze -R
+  plymouth-set-default-theme breeze
   setsebool -P domain_kernel_load_modules on
 
   printf '%s\n' "${grub_conf[@]}" > /etc/default/grub
