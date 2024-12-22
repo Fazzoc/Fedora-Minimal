@@ -127,13 +127,13 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
   flatpak install flathub ${flatpaks[*]} ${flatpaks[$device_type]} -y
-}
+} > /dev/null 2>&1
 
 progress_update "" "Updating packages..."
 {
   dnf -y update
   flatpak update -y
-}
+} > /dev/null 2>&1
 
 progress_update "" "Erasing unused packages..."
 {
