@@ -57,6 +57,8 @@ base_packages=(
   "bluedevil"
   "kde-gtk-config"
   "NetworkManager-config-connectivity-fedora"
+  "plasma-nm"
+  "NetworkManager-wifi"
   "pinentry-qt"
   "plasma-desktop"
   "plymouth-theme-breeze"
