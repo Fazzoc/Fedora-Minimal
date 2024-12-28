@@ -6,30 +6,25 @@ current_step=-1
 current_stage=""
 
 display_progress() {
-    local message="$1" subtitle="$2" progress="$3"
-    local term_width=$(tput cols) term_height=$(tput lines)
-    local bar_width=100 completed=$((progress * bar_width / 100))
-    local start_row=$(( (term_height - 4) / 2 ))
-    local start_col=$(( (term_width - (bar_width + 4)) / 2 ))
+    local p=$3 w=100
+    local r=$(( ($(tput lines) - 4) / 2 ))
+    local c=$(( ($(tput cols) - w - 4) / 2 ))
+    local t="[$p%] $current_stage${2:+ ($2)}"
+    local b=$(printf '%.0s─' $(seq 1 $((w + 2))))
+    local pad=$(( (w - ${#t}) / 2 ))
+    local msg=$(printf "%*s%s%*s" "$pad" "" "$t" "$pad" "")
     
-    local message_with_subtitle="[$progress%] $current_stage${subtitle:+ ($subtitle)}"
-    local padding=$(( (bar_width - ${#message_with_subtitle}) / 2 ))
-    local centered_message=$(printf "%*s%s%*s" "$padding" "" "${message_with_subtitle:0:$bar_width}" "$padding" "")
-    local bar=$(printf "\033[42m%*s\033[0m%*s" "$completed" "" "$((bar_width - completed))" "")
-    local border_line=$(printf '%.0s─' $(seq 1 $((bar_width + 2))))
-    
-    printf "\033[2J\033[%d;%dH\033[34m┌%s┐\033[0m" "$start_row" "$start_col" "$border_line"
-    printf "\033[%d;%dH\033[34m│\033[0m %-${bar_width}s \033[34m│\033[0m" "$((start_row + 1))" "$start_col" "$centered_message"
-    printf "\033[%d;%dH\033[34m│\033[0m %s \033[34m│\033[0m" "$((start_row + 2))" "$start_col" "$bar"
-    printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((start_row + 3))" "$start_col" "$border_line"
-    printf "\033[%d;0H" "$((start_row + 5))"
+    printf "\033[2J"
+    printf "\033[%d;%dH\033[34m┌%s┐\033[0m" "$r" "$c" "$b"
+    printf "\033[%d;%dH\033[34m│\033[0m %-${w}s \033[34m│\033[0m" "$((r + 1))" "$c" "$msg"
+    printf "\033[%d;%dH\033[34m│\033[0m \033[42m%*s\033[0m%*s \033[34m│\033[0m" "$((r + 2))" "$c" "$((p * w / 100))" "" "$((w - p * w / 100))" ""
+    printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((r + 3))" "$c" "$b"
+    printf "\033[%d;0H" "$((r + 5))"
 }
 
 progress_update() {
-    ((current_step++))
-    local progress=$((current_step * 100 / total_steps))
     current_stage="${1:-$current_stage}"
-    [ "$3" != "no_display" ] && display_progress "$current_stage" "$2" $progress
+    [ "$3" != "no_display" ] && display_progress "$current_stage" "$2" $((++current_step * 100 / total_steps))
 }
 
 #### Package Lists ####
