@@ -89,6 +89,7 @@ device_packages=(
 flatpaks=(
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
+  "io.github.shiftey.Desktop"
 )
 
 device_flatpaks=(
