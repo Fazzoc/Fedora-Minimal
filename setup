@@ -41,7 +41,7 @@ base_packages=(
   "mt7xxx-firmware"
   "realtek-firmware"
   "dnfdragora"
-  "lightly-qt6"
+  "darkly"
   "dolphin"
   "glibc-all-langpacks"
   "kdeplasma-addons"
@@ -130,7 +130,7 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
   dnf -y config-manager setopt fedora-cisco-openh264.enabled=1
   dnf -y copr enable bieszczaders/kernel-cachyos
   dnf -y copr enable bieszczaders/kernel-cachyos-addons
-  dnf -y copr enable deltacopy/lightly-qt6
+  dnf -y copr enable deltacopy/darkly
   dnf -y in ${base_packages[*]} ${device_packages[$device_type]}
 
   flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
