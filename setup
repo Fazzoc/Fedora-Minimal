@@ -47,6 +47,7 @@ base_packages=(
   "kdeplasma-addons"
   "kitty"
   "kinfocenter"
+  "kscreen"
   "krita"
   "kdialog"
   "bluedevil"
