@@ -76,12 +76,13 @@ base_packages=(
   "util-linux-user"
   "steam"
   "wget"
+  "timeshift"
   "vlc"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
 device_packages=(
-  [desktop]="timeshift konsole-part kde-print-manager"
+  [desktop]="konsole-part kde-print-manager"
   [laptop]="btop"
 )
 
