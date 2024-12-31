@@ -34,9 +34,6 @@ base_packages=(
   "mozilla-fira-fonts-common"
   "fontawesome-fonts"
   "jetbrains-mono-fonts"
-  "kernel-cachyos"
-  "cachyos-settings"
-  "uksmd"
   "amd-gpu-firmware"
   "mt7xxx-firmware"
   "realtek-firmware"
@@ -78,6 +75,7 @@ base_packages=(
   "wget"
   "timeshift"
   "vlc"
+  "kio-admin"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
@@ -128,8 +126,6 @@ progress_update "Stage 1 - Package setup" "Installing packages..."
 {
   dnf -y in https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
   dnf -y config-manager setopt fedora-cisco-openh264.enabled=1
-  dnf -y copr enable bieszczaders/kernel-cachyos
-  dnf -y copr enable bieszczaders/kernel-cachyos-addons
   dnf -y copr enable deltacopy/darkly
   dnf -y in ${base_packages[*]} ${device_packages[$device_type]}
 
