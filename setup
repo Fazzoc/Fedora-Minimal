@@ -159,7 +159,7 @@ progress_update "Stage 2 - Configuring system"
 
 progress_update "" "Configuring Services..."
 {
-  runuser -l $SUDO_USER -c 'systemctl --user enable opentabletdriver.service --now'
+  sudo -u $SUDO_USER systemctl --user enable opentabletdriver.service --now
   systemctl enable sddm uksmd.service
   systemctl disable NetworkManager-wait-online.service 
   systemctl set-default graphical.target
