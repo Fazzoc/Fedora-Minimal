@@ -6,20 +6,18 @@ current_step=-1
 current_stage=""
 
 display_progress() {
-    local p=$3 w=100
-    local r=$(( ($(tput lines) - 4) / 2 ))
-    local c=$(( ($(tput cols) - w - 4) / 2 ))
-    local t="[$p%] $current_stage${2:+ ($2)}"
-    local b=$(printf '%.0s─' $(seq 1 $((w + 2))))
-    local pad=$(( (w - ${#t}) / 2 ))
-    local msg=$(printf "%*s%s%*s" "$pad" "" "$t" "$pad" "")
+    local width=$(($(tput cols) * 80 / 100))
+    local center_row=$((($(tput lines) - 4) / 2))
+    local center_col=$((($(tput cols) - width - 4) / 2))
+    local text="[$3%] $1${2:+ ($2)}"
+    local border=$(printf '─%.0s' $(seq 1 $((width + 2))))
     
-    printf "\033[2J"
-    printf "\033[%d;%dH\033[34m┌%s┐\033[0m" "$r" "$c" "$b"
-    printf "\033[%d;%dH\033[34m│\033[0m %-${w}s \033[34m│\033[0m" "$((r + 1))" "$c" "$msg"
-    printf "\033[%d;%dH\033[34m│\033[0m \033[42m%*s\033[0m%*s \033[34m│\033[0m" "$((r + 2))" "$c" "$((p * w / 100))" "" "$((w - p * w / 100))" ""
-    printf "\033[%d;%dH\033[34m└%s┘\033[0m" "$((r + 3))" "$c" "$b"
-    printf "\033[%d;0H" "$((r + 5))"
+    clear
+    printf "\033[%d;%dH\033[34m┌%s┐\033[0m\n" "$center_row" "$center_col" "$border"
+    printf "\033[%d;%dH\033[34m│\033[0m %*s%s%*s \033[34m│\033[0m\n" "$((center_row + 1))" "$center_col" "$(( (width - ${#text}) / 2 ))" "" "$text" "$(( (width - ${#text} + 1) / 2 ))" ""
+    printf "\033[%d;%dH\033[34m│\033[0m \033[42m%*s\033[0m%*s \033[34m│\033[0m\n" "$((center_row + 2))" "$center_col" "$((($3 * width) / 100))" "" "$((width - ($3 * width) / 100))" ""
+    printf "\033[%d;%dH\033[34m└%s┘\033[0m\n" "$((center_row + 3))" "$center_col" "$border"
+    printf "\033[%d;0H" "$((center_row + 5))"
 }
 
 progress_update() {
@@ -76,6 +74,7 @@ base_packages=(
   "timeshift"
   "vlc"
   "kio-admin"
+  "github-desktop"
   "https://github.com/OpenTabletDriver/OpenTabletDriver/releases/latest/download/OpenTabletDriver.rpm"
 )
 
@@ -87,7 +86,7 @@ device_packages=(
 flatpaks=(
   "io.gitlab.librewolf-community"
   "org.onlyoffice.desktopeditors"
-  "io.github.shiftey.Desktop"
+  "sh.ppy.osu"
 )
 
 device_flatpaks=(
@@ -125,6 +124,8 @@ done
 progress_update "Stage 1 - Package setup" "Installing packages..."
 {
   dnf -y in https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+  rpm --import https://rpm.packages.shiftkey.dev/gpg.key
+  sh -c 'echo -e "[shiftkey-packages]\nname=GitHub Desktop\nbaseurl=https://rpm.packages.shiftkey.dev/rpm/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://rpm.packages.shiftkey.dev/gpg.key" > /etc/yum.repos.d/shiftkey-packages.repo'
   dnf -y config-manager setopt fedora-cisco-openh264.enabled=1
   dnf -y copr enable deltacopy/darkly
   dnf -y in ${base_packages[*]} ${device_packages[$device_type]}
@@ -156,8 +157,9 @@ progress_update "Stage 2 - Configuring system"
   grub2-mkconfig -o /boot/grub2/grub.cfg
 } > /dev/null 2>&1
 
-progress_update "" "Configuring Services..." # printf "Note: The command (systemctl --user enable opentabletdriver.service --now) will need to be run as user to enable the OpenTabletDriver service. please do so after your reboot." #
+progress_update "" "Configuring Services..."
 {
+  runuser -l $SUDO_USER -c 'systemctl --user enable opentabletdriver.service --now'
   systemctl enable sddm uksmd.service
   systemctl disable NetworkManager-wait-online.service 
   systemctl set-default graphical.target
