@@ -159,7 +159,7 @@ progress_update "Stage 2 - Configuring system"
 
 progress_update "" "Configuring Services..."
 {
-  sudo -u $SUDO_USER systemctl --user enable opentabletdriver.service --now
+  sudo -u $SUDO_USER bash -c 'export XDG_RUNTIME_DIR="/run/user/$(id -u $SUDO_USER)"; systemctl --user enable opentabletdriver.service --now'
   systemctl enable sddm uksmd.service
   systemctl disable NetworkManager-wait-online.service 
   systemctl set-default graphical.target
